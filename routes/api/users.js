@@ -10,6 +10,7 @@ const passport = require('passport')
 
 // load Input validation
 const validateRegisterInput = require('../../validation/register')
+const validateLoginInput = require('../../validation/login')
 
 // Load User model
 const User = require('../../models/User')
@@ -23,6 +24,8 @@ router.get('/test', (req, res) => res.json({msg: 'users works'}))
 // access   Pulic
 router.post('/register', (req, res) => {
     const {errors, isValid} = validateRegisterInput(req.body)
+
+    // check validation
 
     if (!isValid) {
         return res.status(400).json(errors)
@@ -62,13 +65,25 @@ router.post('/register', (req, res) => {
 // desc     Log in user / returning JWT Token
 // access   Pulic
 router.post('/login', (req, res) => {
+
+    const {errors, isValid} = validateLoginInput(req.body)
+
+    // check validation
+
+    if (!isValid) {
+        return res.status(400).json(errors)
+    }
+
+
     const email = req.body.email
     const password = req.body.password
+
 
     // find user with that email
     User.findOne({email: email}).then(user => { // check for user
         if (!user) {
-            return res.status(404).json({email: 'User with that email not found'})
+            errors.email = 'User with that email not found'
+            return res.status(404).json(errors)
         }
         // check password
         bcrypt.compare(password, user.password).then(isMatch => {
@@ -93,7 +108,8 @@ router.post('/login', (req, res) => {
                 })
                 // res.json({msg: 'user match success'})
             } else {
-                return res.status(400).json({password: 'Oops!!..Wrong Password'})
+                errors.password = 'Oops!!..Password is wrong'
+                return res.status(400).json(errors)
             }
         })
     })
