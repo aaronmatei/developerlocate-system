@@ -23,11 +23,18 @@ export const loginUser = userData => dispatch => {
     }).catch(err => dispatch({type: GET_ERRORS, payload: err.response.data}))
 }
 
-// set current user
+// set current/logged user
 export const setCurrentUser = (decoded) => {
     return {type: SET_CURRENT_USER, payload: decoded}
 }
 
 
-// Login User
-// axios.post('api/users/login', user).then(res => console.log(res.data)).catch(err => console.log(err.response.data))
+// Log user out
+export const logoutUser = () => dispatch => { // Remove token from local storage
+    localStorage.removeItem('jwtToken')
+    // Remove auth header for future requests
+    setAuthToken(false)
+    dispatch(setCurrentUser({}))
+
+
+}
